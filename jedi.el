@@ -507,6 +507,9 @@ See also: `jedi:server-args'."
     (lambda (reply)
       (setq jedi:complete-reply reply))))
 
+(defun jedi:complete-request-sync ()
+  (epc:sync (jedi:get-epc) (jedi:complete-request)))
+
 ;;;###autoload
 (defun* jedi:complete (&key (expand ac-expand-on-auto-complete))
   "Complete code at point."
@@ -538,6 +541,11 @@ See also: `jedi:server-args'."
                         :summary description)))
    jedi:complete-reply))
 
+(defun jedi:ac-direct-matches-sync ()
+  (jedi:complete-request-sync)
+  (jedi:ac-direct-matches)
+)
+
 (defun jedi:ac-direct-prefix ()
   (or (ac-prefix-default)
       (when (= jedi:complete-request-point (point))
@@ -546,8 +554,8 @@ See also: `jedi:server-args'."
 ;; (makunbound 'ac-source-jedi-direct)
 (ac-define-source jedi-direct
   '((candidates . jedi:ac-direct-matches)
-    (prefix . jedi:ac-direct-prefix)
-    (init . jedi:complete-request)
+ ;   (prefix . jedi:ac-direct-prefix)
+    (init . jedi:complete-request-sync)
     (requires . -1)))
 
 ;;;###autoload
